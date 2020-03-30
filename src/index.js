@@ -1,5 +1,9 @@
 const express = require('express')
+
+//Mongoose Connection
 require('./db/mongoose')
+
+//Models
 const User = require('./models/user')
 const Task = require('./models/task')
 
@@ -10,17 +14,75 @@ const app = express()
 //Automatically Parse incoming JSON to an object
 app.use(express.json())
 
-//We use POST for resource creation
+
+
+//Get for fetch data
+app.get('/users', (req, res) => {
+    User.find({}).then((users)=>{
+        res.send(users)
+    }).catch((e)=>{
+        res.status(500).send()
+    })
+})
+
+// Route parameters --> parts of the URl are used to capture dynamic values (:id)
+app.get('/users/:id',(req, res) => {
+    const _id = req.params.id
+
+    //Mongoose converts for us string _id to object id  by itself in "findById" function 
+    User.findById(_id).then((user)=>{
+        if(!user){
+            return res.status(404).send()  
+        }
+        res.send(user)  
+    }).catch((e)=>{
+        res.status(500).send(e)
+    })
+})
+
+
+app.get('/tasks', (req, res) => {
+    Task.find({}).then((tasks)=>{
+        res.send(tasks)
+    }).catch((e)=>{
+        res.status(500).send()
+    })
+})
+
+
+app.get('/tasks/:id', (req, res) => {
+    const _id = req.params.id
+    Task.findById(_id).then((task) => {
+        if(!task){
+            return res.status(404).send()
+        }
+        res.send(task)
+    }).catch((e) => {
+        res.status(500).send()
+    })
+})
+
+
+//POST for resource creation
 app.post('/users', (req, res) => {
     const user = new User(req.body)
     user.save().then(() => {
-        res.send(user)
+        res.status(201).send(user)
     }).catch( (Error) => {
         res.status(400)
         res.send(Error)
     })
 })
 
+app.post('/tasks', (req, res) => {
+    const task = new Task (req.body)
+    task.save().then(() => {
+        res.status(201).send(task)
+    }).catch( (e)=> {
+        res.status(400).send(e)
+    })
+
+})
 app.listen(port, ()=>{
     console.log('The server is up on port', port);
 })
