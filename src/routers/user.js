@@ -44,20 +44,21 @@ router.post('/users', async (req, res) => {
 
 //Update User
 router.patch('/users/:id', async (req, res) => {
+    //Check given parameters
+    
     const updates = Object.keys(req.body)
     const validParameters = ['gender','name','age','email','password']
-    const isValid = updates.every((parameter)=>{
-        validParameters.includes(parameter)
-    })
-    if(!isValid){
-        return res.status(400).send({error: 'Invalid parameters'})
+    const isValidOperation = updates.every((parameter) => validParameters.includes(parameter))
+    if(!isValidOperation){
+        return res.status(400).send({error: "Invalid parameters"})
     }
-
     try{
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const user = await User.findById(req.params.id)
         if(!user) {
             return res.status(404).send()
         }
+        updates.forEach((update) => user[update] = req.body[update])
+        await user.save()
         res.send(user)
     }catch (e) {
         res.status(400).send(e)

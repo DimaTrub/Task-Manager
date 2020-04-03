@@ -45,19 +45,22 @@ router.post('/tasks', async (req, res) => {
 //Update task
 router.patch('/tasks/:id', async (req, res) => {
     const validFields = ['completed','description']
-    const userFields = Object.keys(req.body)
-    const isValid = userFields.every((parameter) => validFields.includes(parameter))
+    const taskFields = Object.keys(req.body)
+    const isValid = taskFields.every((parameter) => validFields.includes(parameter))
 
     if(!isValid){
         return res.status(400).send({error: 'Invalid parameters'})
     }
     const _id = req.params.id
     try{
-        const user = await Task.findByIdAndUpdate(_id, req.body,{new: true, runValidators: true})
-        if(!user){
+        const task = await Task.findById(_id, req.body)
+        if(!task){
             return res.status(404).send()
         }
-        res.send(user)
+        validFields.forEach((update)=>{
+            task[update] = req.body[update]
+        })
+        res.send(task)
     }catch (e){
         res.status(400).send(e)
     }

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 
 
-const taskSchema = {
+const taskSchema = new mongoose.Schema({
     description: {
         type: String,
         trim: true,
@@ -12,7 +12,7 @@ const taskSchema = {
         type: Boolean,
         default: false
     }
-}
+})
 
 const Task = mongoose.model('Task',taskSchema)
 
